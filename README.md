@@ -118,6 +118,23 @@ To destroy the infrastructure:
 terraform destroy
 ```
 
+## Support the Project
+If you're new to Vultr and would like to support this project, you can use one of our referral links when signing up:
+
+### Option 1: $300 Credit for New Users
+- [Sign up with this link](https://www.vultr.com/?ref=9683297-9J)
+- New users receive $300 in credits to test the platform
+- The project receives $100 when you become an active user
+- Requires minimum $100 usage and 30+ days of activity
+- Credit expires after 30 days if unused
+
+### Option 2: Standard Referral
+- [Sign up with this link](https://www.vultr.com/?ref=9515472)
+- The project receives $10 when you become an active user
+- Requires minimum $10 usage and 30+ days of activity
+
+**Note:** These are affiliate/referral links. Using them is completely optional and doesn't affect the functionality of this project. You can also sign up directly at [Vultr.com](https://www.vultr.com) without using any referral link.
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
