@@ -1,0 +1,5 @@
+---
+- name: restart rnsd
+  systemd:
+    name: rnsd
+    state: restarted

@@ -1,0 +1,9 @@
+---
+- hosts: all
+  become: yes
+  vars:
+    rns_interface_device: "{{ rns_interface_device }}"
+    rns_server_port: "{{ rns_server_port }}"
+    rns_node_name: "{{ rns_node_name }}"
+  roles:
+    - rnsd

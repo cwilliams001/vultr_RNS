@@ -1,0 +1,69 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Upgrade all packages
+  apt:
+    upgrade: full
+    autoclean: yes
+    autoremove: yes
+
+- name: Install pip
+  apt:
+    name: python3-pip
+    state: present
+    update_cache: yes
+
+- name: Install RNS via pip
+  pip:
+    name: rns
+    state: present
+
+- name: Create .reticulum directory
+  file:
+    path: "{{ ansible_env.HOME }}/.reticulum"
+    state: directory
+    mode: '0755'
+
+- name: Run RNSD once to generate initial config
+  command: rnsd
+  async: 10
+  poll: 0
+  ignore_errors: yes
+
+- name: Wait for config file to be generated
+  wait_for:
+    path: "{{ ansible_env.HOME }}/.reticulum/config"
+    state: present
+    timeout: 10
+
+- name: Kill initial RNSD process
+  command: pkill rnsd
+  ignore_errors: yes
+
+- name: Configure reticulum config
+  template:
+    src: reticulum_config.j2
+    dest: "{{ ansible_env.HOME }}/.reticulum/config"
+    mode: '0644'
+
+- name: Allow UFW port 4965
+  ufw:
+    rule: allow
+    port: '4965'
+    proto: tcp
+
+- name: Create systemd service file
+  template:
+    src: rnsd.service.j2
+    dest: /etc/systemd/system/rnsd.service
+    mode: '0644'
+
+- name: Start and enable RNSD service
+  systemd:
+    name: rnsd
+    state: started
+    enabled: yes
+    daemon_reload: yes
