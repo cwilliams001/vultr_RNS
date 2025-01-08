@@ -23,31 +23,41 @@
 
 - name: Create .reticulum directory
   file:
-    path: "{{ ansible_env.HOME }}/.reticulum"
+    path: "{{ automation_home }}/.reticulum"
     state: directory
     mode: '0755'
+    owner: "{{ automation_user }}"
+    group: "{{ automation_group }}"
 
 - name: Run RNSD once to generate initial config
-  command: rnsd
+  ansible.builtin.command:
+    cmd: rnsd
+  become: yes
+  become_user: "{{ automation_user }}"
+  environment:
+    HOME: "{{ automation_home }}"
   async: 10
   poll: 0
   ignore_errors: yes
 
 - name: Wait for config file to be generated
   wait_for:
-    path: "{{ ansible_env.HOME }}/.reticulum/config"
+    path: "{{ automation_home }}/.reticulum/config"
     state: present
     timeout: 10
 
 - name: Kill initial RNSD process
-  command: pkill rnsd
+  ansible.builtin.command:
+    cmd: pkill rnsd
   ignore_errors: yes
 
 - name: Configure reticulum config
   template:
     src: reticulum_config.j2
-    dest: "{{ ansible_env.HOME }}/.reticulum/config"
+    dest: "{{ automation_home }}/.reticulum/config"
     mode: '0644'
+    owner: "{{ automation_user }}"
+    group: "{{ automation_group }}"
 
 - name: Allow UFW port 4965
   ufw:

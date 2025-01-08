@@ -49,6 +49,6 @@ resource "null_resource" "run_ansible" {
   }
 
   provisioner "local-exec" {
-    command = "cd playbooks && ANSIBLE_ROLES_PATH=./roles ansible-playbook -i inventory.ini setup_rnsd.yml --extra-vars 'rns_interface_device=${var.rns_interface_device} rns_server_port=${var.rns_server_port} rns_node_name=${var.rns_node_name}'"
+   command = "cd playbooks && ANSIBLE_ROLES_PATH=./roles ansible-playbook -i inventory.ini setup_rnsd.yml --extra-vars 'automation_user=${var.automation_user} rns_interface_device=${var.rns_interface_device} rns_server_port=${var.rns_server_port} rns_node_name=${var.rns_node_name} ssh_public_key=\"${file(pathexpand(var.ssh_public_key_path))}\"'" 
   }
 }

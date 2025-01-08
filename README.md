@@ -1,9 +1,8 @@
-# Automated RNS Transport Node Deployment
 
+# Automated RNS Transport Node Deployment
 This project automates the deployment of a [Reticulum Network Stack (RNS)](https://reticulum.network/) transport node on a Vultr VPS using Terraform and Ansible.
 
 ## Prerequisites
-
 You should have the following installed on your local machine:
 - [Terraform](https://www.terraform.io/downloads.html) (v1.10.3 or later)
 - [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) (v2.15 or later)
@@ -11,9 +10,10 @@ You should have the following installed on your local machine:
 You will also need:
 - A Vultr account
 - A Vultr API Key
-- An SSH Key added to your Vultr account
+- An SSH key pair on your local machine
 
-To obtain your SSH key ID, run:
+### Getting Your Vultr SSH Key ID
+After adding your SSH key to Vultr, get your SSH key ID by running:
 ```bash
 curl -H 'Authorization: Bearer YOUR_VULTR_API_KEY' https://api.vultr.com/v2/ssh-keys
 ```
@@ -26,22 +26,26 @@ git clone https://github.com/yourusername/vultr_RNS.git
 cd vultr_RNS
 ```
 
-2. Copy the example variables file and edit it with your values:
-
+2. Copy the example variables file:
 ```bash
 cp terraform.tfvars.example terraform.tfvars
 ```
 
-3. Edit `terraform.tfvars` file with your configuration:
-
+3. Configure your deployment by editing `terraform.tfvars`:
 ```hcl
-vultr_api_key         = "your-vultr-api-key"
-ssh_key_id           = "your-ssh-key-id"
-rns_interface_device = "enp1s0"  # Network interface device
-rns_server_port      = 4965      # Port for RNS server
-rns_node_name        = "My RNS Transport Node"  # Your node name
-```
+# Vultr Configuration
+vultr_api_key = "your-vultr-api-key"
+ssh_key_id    = "your-ssh-key-id"
 
+# RNS Configuration
+rns_interface_device = "enp1s0"    # Network interface name
+rns_server_port     = 4965         # Port for RNS server
+rns_node_name       = "My_RNS_Transport_Node"
+
+# Security Configuration
+automation_user  = "ansible"        # User that will run the RNS service
+ssh_key_path    = "~/ansible.pub"  # Path to your SSH public key
+```
 Note: The `terraform.tfvars` file contains sensitive information and is ignored by git to prevent accidentally committing your credentials.
 
 Also, make sure to add `terraform.tfvars` to your `.gitignore` file if it's not already there:
@@ -53,6 +57,15 @@ terraform.tfvars
 *.tfstate
 *.tfstate.*
 ```
+
+### Configuration Variables Explained
+- `vultr_api_key`: Your Vultr API key for creating resources
+- `ssh_key_id`: The ID of your SSH key in Vultr (obtained from the curl command above)
+- `rns_interface_device`: Network interface name (usually "enp1s0" on Vultr)
+- `rns_server_port`: Port for RNS communications (default: 4965)
+- `rns_node_name`: Name to identify your transport node
+- `automation_user`: Username for the service account (default: ansible)
+- `ssh_key_path`: Path to your SSH public key file
 
 ## Deployment
 
@@ -66,89 +79,82 @@ terraform init
 terraform plan
 ```
 
-3. Apply the configuration:
+3. Deploy the infrastructure:
 ```bash
 terraform apply
 ```
 
-This will:
-- Create a new VPS instance on Vultr
-- Update and upgrade system packages
-- Install and configure RNS
-- Set up RNS as a system service
-- Configure the firewall
-- Connect to various RNS network nodes
+### What Gets Deployed
+- VPS Instance:
+  - 1 CPU, 1GB RAM (vc2-1c-1gb)
+  - Ubuntu 22.04 LTS
+  - Located in Vultr's New Jersey datacenter (ewr)
 
-## What Gets Deployed
+- Software & Configuration:
+  - RNS transport node
+  - UFW firewall (configured for RNS)
+  - Systemd service for RNS
+  - Security hardening
 
-The deployment creates:
-- A 1 CPU, 1GB RAM VPS in Vultr's New Jersey datacenter
-- Ubuntu 22.04 LTS operating system
-- RNS transport node with connections to multiple network nodes
-- UFW firewall configured to allow RNS traffic
-- Systemd service for automatic RNS startup
+### Security Features
+The deployment implements several security best practices:
+- Creates a non-root service account (default: ansible)
+- Disables root and password-based login
+- Enables only key-based SSH authentication
+- Configures UFW firewall
+- Runs RNS service as non-root user
 
-## Customization
+## Post-Deployment Management
 
-You can modify the following variables in `terraform.tfvars`:
-- `rns_interface_device`: Network interface name
-- `rns_server_port`: Port number for RNS server
-- `rns_node_name`: Name of your transport node
-
-To modify the VPS specifications, edit `main.tf`:
-- `plan`: VPS size (default: vc2-1c-1gb)
-- `region`: Datacenter location (default: ewr)
-
-## Maintenance
-
-To check the status of your RNS node:
+### Checking Service Status
 ```bash
-ssh root@<your-vps-ip> 'systemctl status rnsd'
+# Replace with your server's IP and automation_user name
+ssh automation_user@<server-ip> 'systemctl status rnsd'
 ```
 
-To view logs:
+### Viewing Logs
 ```bash
-ssh root@<your-vps-ip> 'journalctl -u rnsd'
+ssh automation_user@<server-ip> 'journalctl -u rnsd -f'
+```
+
+### Modifying VPS Specifications
+To change VPS size or location, edit these values in `main.tf`:
+```hcl
+plan   = "vc2-1c-1gb"  # VPS size
+region = "ewr"         # Datacenter location
 ```
 
 ## Cleanup
-
-To destroy the infrastructure:
+To remove all created resources:
 ```bash
 terraform destroy
 ```
 
 ## Support the Project
-If you're new to Vultr and would like to support this project, you can use one of our referral links when signing up:
 
-### Option 1: $300 Credit for New Users
-- [Sign up with this link](https://www.vultr.com/?ref=9683297-9J)
-- New users receive $300 in credits to test the platform
-- The project receives $100 when you become an active user
-- Requires minimum $100 usage and 30+ days of activity
-- Credit expires after 30 days if unused
+### Vultr Referral Options
 
-### Option 2: Standard Referral
-- [Sign up with this link](https://www.vultr.com/?ref=9515472)
-- The project receives $10 when you become an active user
-- Requires minimum $10 usage and 30+ days of activity
+#### Option 1: $300 Credit (New Users)
+- [Sign up here](https://www.vultr.com/?ref=9683297-9J)
+- Get $300 in credits (30-day expiry)
+- Project receives $100 after $100 usage
 
-**Note:** These are affiliate/referral links. Using them is completely optional and doesn't affect the functionality of this project. You can also sign up directly at [Vultr.com](https://www.vultr.com) without using any referral link.
+#### Option 2: Standard Referral
+- [Sign up here](https://www.vultr.com/?ref=9515472)
+- Project receives $10 after $10 usage
+
+**Note:** Using referral links is optional and doesn't affect functionality.
 
 ## Contributing
-
 Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
-
 [MIT License](LICENSE)
 
 ## Acknowledgments
-
 - [Reticulum Network Stack](https://reticulum.network/)
 - [Vultr](https://www.vultr.com/)
 - The RNS community
 
 ## Support
-
-If you encounter any issues, please open an issue in this repository.
+For issues or questions, please open an issue in this repository.

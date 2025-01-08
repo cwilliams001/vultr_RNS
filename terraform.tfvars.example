@@ -1,8 +1,12 @@
+# Basic Configuration
 vultr_api_key         = "your-vultr-api-key"
 ssh_key_id           = "your-ssh-key-id"
-rns_interface_device = "enp1s0"  # Network interface device
-rns_server_port      = 4965      # Port for RNS server
-rns_node_name        = "My RNS Transport Node"  # Your node name
 
-## run the following command to get the ssh key id: 
-##curl -H 'Authorization: Bearer Vultr_API_KEY' https://api.vultr.com/v2/ssh-keys
+# RNS Configuration
+rns_interface_device = "enp1s0"
+rns_server_port      = 4965
+rns_node_name        = "My RNS Transport Node"
+
+# Ansible Configuration
+automation_user      = "ansible"  # Change this to use a different username
+ssh_public_key_path = "~/.ssh/id_rsa.pub"

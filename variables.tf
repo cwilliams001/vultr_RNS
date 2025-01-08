@@ -27,3 +27,15 @@ variable "rns_node_name" {
   type        = string
   default     = "RNS Net US-East"
 }
+
+variable "ssh_public_key_path" {
+  description = "Path to the SSH public key file"
+  type        = string
+  default     = "~/.ssh/id_rsa.pub"
+}
+
+variable "automation_user" {
+  description = "Username for the automation user"
+  type        = string
+  default     = "ansible"
+}

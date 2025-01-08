@@ -1,0 +1,5 @@
+---
+# Default values for automation user
+automation_user: ansible
+automation_group: "{{ automation_user }}"
+automation_home: "/home/{{ automation_user }}"

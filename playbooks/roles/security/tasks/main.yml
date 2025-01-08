@@ -1,0 +1,46 @@
+---
+- name: Create automation user
+  user:
+    name: "{{ automation_user }}"
+    shell: /bin/bash
+    createhome: yes
+    state: present
+
+- name: Create .ssh directory
+  file:
+    path: "{{ automation_home }}/.ssh"
+    state: directory
+    mode: '0700'
+    owner: "{{ automation_user }}"
+    group: "{{ automation_group }}"
+
+- name: Add SSH key
+  copy:
+    content: "{{ ssh_public_key }}"
+    dest: "{{ automation_home }}/.ssh/authorized_keys"
+    mode: '0600'
+    owner: "{{ automation_user }}"
+    group: "{{ automation_group }}"
+
+- name: Add automation user to sudoers
+  copy:
+    content: "{{ automation_user }} ALL=(ALL) NOPASSWD:ALL"
+    dest: "/etc/sudoers.d/{{ automation_user }}"
+    mode: '0440'
+
+- name: Update SSH configuration
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+  loop:
+    - regexp: '^#?PermitRootLogin'
+      line: 'PermitRootLogin prohibit-password'
+    - regexp: '^#?PasswordAuthentication'
+      line: 'PasswordAuthentication no'
+    - regexp: '^#?ChallengeResponseAuthentication'
+      line: 'ChallengeResponseAuthentication no'
+    - regexp: '^#?PubkeyAuthentication'
+      line: 'PubkeyAuthentication yes'
+  notify: Restart sshd
