@@ -44,7 +44,7 @@ rns_node_name       = "My_RNS_Transport_Node"
 
 # Security Configuration
 automation_user  = "ansible"        # User that will run the RNS service
-ssh_key_path    = "~/ansible.pub"  # Path to your SSH public key
+ssh_public_key_path    = "~/ansible.pub"  # Path to your SSH public key
 ```
 Note: The `terraform.tfvars` file contains sensitive information and is ignored by git to prevent accidentally committing your credentials.
 
@@ -65,7 +65,7 @@ terraform.tfvars
 - `rns_server_port`: Port for RNS communications (default: 4965)
 - `rns_node_name`: Name to identify your transport node
 - `automation_user`: Username for the service account (default: ansible)
-- `ssh_key_path`: Path to your SSH public key file
+- `ssh_public_key_path`: Path to your SSH public key file
 
 ## Deployment
 
